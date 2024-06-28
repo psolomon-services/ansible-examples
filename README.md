@@ -13,7 +13,7 @@ All private information (config) has been removed.
 - `info.yml`:                    _similar to ping, gives more info on nodes_
 - `jenkins.yml`:                 _jenkins install, from CASC plugin (the CASC setup is in Ansible vault because of some private certs, but has been removed from this repo)_
   - _similar goal to AWX, out of box full setup_
-- `pihole.yml`:                  _full pihole install, including adlists and local DNS_
+- `pihole.yml`:                  _full pihole install, including unbound, adlists, and local DNS config_
 - `pihole-test-dns-lookups.yml`: _test pihole DNS setup_
 - `pihole-update-adlists.yml`:   _update adlists (with option to turn each ON or OFF)_
 - `pihole-update-dns.yml`:       _updates pihole local DNS list_
