@@ -9,7 +9,7 @@ Playbooks:
   - _the goal for this project was for an out of the box installtion (i.e. log in, press a button, deploy pihole, with no additional changes to the AWX UI)_
 - `info.yml`:                    _similar to ping, gives more info on nodes_
 - `jenkins.yml`:                 _jenkins install, from CASC plugin (the CASC setup is in Ansible vault because of some private certs, but has been removed from this repo)_
-  - `similar goal to AWX, out of box full setup`
+  - _similar goal to AWX, out of box full setup_
 - `pihole.yml`:                  _full pihole install, including adlists and local DNS_
 - `pihole-test-dns-lookups.yml`: _test pihole DNS setup_
 - `pihole-update-adlists.yml`:   _update adlists (with option to turn each ON or OFF)_
