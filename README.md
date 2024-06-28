@@ -12,8 +12,8 @@ _Most of my TODOs are related to splitting up roles and cleaning up the playbook
 ## Playbooks
 
 - `awx.yml`:                     _full deploy of an AWX setup, including UI setup (project/inventory/templates/etc)_
-  - _this was written prior to moving to kubernetes (but the k8s deploy still needs ansible UI setup from this playbook, due to lack of CRDs for resources like `Projects` and `Inventory`)_
-  - _the goal for this project was for an out of the box installation (i.e. log in, press a button, deploy pihole, with no additional changes to the AWX UI)_
+  - _This was written prior to moving to Kubernetes (but the K8s deploy still needs Ansible UI setup from this playbook, due to lack of K8s CRDs for resources like `Projects` and `Inventory`)_
+  - _The goal for this project was for an out of the box installation (i.e. log in, press a button, deploy pihole, with no additional changes to the AWX UI)_
   - _NOTE:  this awx playbook installs most, if not all, of the following playbooks (as Templates) in the AWX UI_
 - `info.yml`:                    _similar to ping, gives more info on nodes_
 - `jenkins.yml`:                 _jenkins install, from CASC plugin (the CASC setup is in Ansible vault because of some private certs, but has been removed from this repo)_
