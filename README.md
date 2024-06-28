@@ -12,7 +12,7 @@ _Most of my TODOs are related to splitting up roles and cleaning up the playbook
 ## Playbooks
 
 - `awx.yml`:                     _full deploy of an AWX setup, including UI setup (project/inventory/templates/etc.)_
-  - _this was written prior to moving to kubernetes (but the k8s deploy still needs ansible UI setup from this playbook)_
+  - _this was written prior to moving to kubernetes (but the k8s deploy still needs ansible UI setup from this playbook, due to lack of CRDs for things like `Projects` and `Inventory`)_
   - _the goal for this project was for an out of the box installation (i.e. log in, press a button, deploy pihole, with no additional changes to the AWX UI)_
   - _this is definitely my most complex playbook/role_
   - _NOTE:  this awx playbook installs most, if not all, of the following playbooks (as Templates) in the AWX UI_
