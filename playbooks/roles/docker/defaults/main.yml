@@ -1,0 +1,15 @@
+docker_network_name:  nginx_proxy
+docker_gpg_url:       https://download.docker.com/linux/ubuntu/gpg
+docker_apt_spec:      "deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable"
+
+docker_pkg_list:
+  - docker-ce
+  - docker-ce-cli
+  - docker-compose
+  - containerd.io
+
+docker_network:
+  name: nginx_proxy
+  subnet: 172.16.1.0/24
+  gateway: 172.16.1.1
+  iprange: 172.16.1.0/24

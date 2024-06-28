@@ -1,0 +1,28 @@
+secrets:
+  awx:
+    awx_admin_password:               ''
+    awx_default_user_password:        ''
+
+  jenkins:
+    jenkins_admin_password:           ''
+    jenkins_ansible_password:         ''
+
+  pihole:
+    pihole_web_password:              ''
+
+  plex:
+    claim:                            ''
+
+  portainer:
+    portainer_admin_password:         ''
+    portainer_default_user_password:  ''
+
+  postgres:
+    postgres_password:                ''
+
+  samba:
+    samba_mount_password:             ''
+
+  # this looks odd, but is bootstrapped via the --vault-password-file arg for the local playbook.  this works in AWX (ansible tower) because we create a credential with this
+  vault:
+    vault_password:                   ''

@@ -1,0 +1,26 @@
+---
+# "module" args
+#   - awx_name:  name of container to wait on (only for logging)
+#   - awx_ip:    ip address of container, if blank, default to checking at host node level
+#   - awx_port:  port to check
+
+- name: wait for container to start (host and port)
+  wait_for:
+    host:             '{{ awx_ip }}'
+    port:             '{{ awx_port }}'
+    connect_timeout:  3
+    delay:            3
+    timeout:          30
+  when:  awx_ip is defined
+  tags:
+    - awx
+
+- name: wait for container to start (localhost and port)
+  wait_for:
+    port:             '{{ awx_port }}'
+    connect_timeout:  3
+    delay:            3
+    timeout:          30
+  when:  awx_ip is not defined
+  tags:
+    - awx

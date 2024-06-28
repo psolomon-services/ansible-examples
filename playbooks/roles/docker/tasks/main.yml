@@ -1,0 +1,119 @@
+---
+- name: add Docker GPG apt Key
+  apt_key:
+    url:    "{{ docker_gpg_url }}"
+    state:  present
+  become:  true
+  tags:
+    - docker
+
+- name: add docker repository to apt
+  apt_repository:
+    repo:          "{{ docker_apt_spec }}"
+    state:         present
+    update_cache:  true
+  become:  true
+  tags:
+    - docker
+
+- name: install docker packages
+  apt:
+    state:         latest
+    update_cache:  true
+    pkg:           "{{ docker_pkg_list }}"
+  become:  true
+  tags:
+    - docker
+
+- name: ensure docker daemon is running
+  service:
+    name:     docker
+    state:    started
+    enabled:  true
+  become:  true
+  tags:
+    - docker
+
+- name:  create docker startup script dir
+  file:
+    path:   /etc/systemd/system/docker.service.d
+    state:  directory
+    owner:  root
+    group:  docker
+  become:  true
+  tags:
+    - docker
+
+- name:  copy docker startup script
+  template:
+    src:    templates/docker-remote-api.conf.j2
+    dest:   /etc/systemd/system/docker.service.d/docker-remote-api.conf
+    owner:  ansible
+    group:  docker
+  become:  true
+  tags:
+    - docker
+
+- name: force systemd to reread configs
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become:  true
+  tags:
+    - docker
+
+#TODO:  MOVE TO A HANDLER
+- name: restart docker
+  ansible.builtin.systemd:
+    state:          restarted
+    daemon_reload:  true
+    name:           docker
+  become:  true
+  tags:
+    - docker
+
+- name: install docker module for python
+  pip:
+    name: docker
+  become:  true
+  tags:
+    - docker
+
+- name: add users to the docker/sudo/{{ deploy_group }} groups
+  user:
+    name:    '{{ item }}'
+    groups:  docker,sudo,{{ deploy_group }}
+    append:  true
+  with_items:
+    - '{{ deploy_user }}'
+    - ubuntu
+  become:  true
+  #register:  add_user_info
+  tags:
+    - docker
+
+- name: reset ssh connection
+  ansible.builtin.meta: reset_connection
+
+- name: create a docker network for pihole ({{ docker_network_name }}, subnet {{ docker_network.subnet }})
+  docker_network:
+    name: "{{ docker_network_name }}"
+    ipam_config:
+      - subnet:    '{{ docker_network.subnet }}'
+        gateway:   '{{ docker_network.gateway }}'
+        #iprange:  '{{ docker_network.iprange }}'
+  register: network_result
+  #become:  true
+  tags:
+    - docker
+    - docker2
+
+#- name: print network facts for {{ docker_network_name }}
+#  debug:
+#    var: network_result.network
+#  tags:
+#    - docker
+
+#- name:  print add user to group info
+#  debug:  var=add_user_info
+#  tags:
+#    - docker

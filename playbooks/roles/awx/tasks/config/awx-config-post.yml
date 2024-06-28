@@ -1,0 +1,49 @@
+---
+# NOTE:  original file had this order, in case this breaks things:
+# - name:  Update CA trust in awx containers
+# - name:  migrate and restart containers
+# - name:  set admin password for AWX UI
+# - name:  copy ssh creds to aws_task container
+
+- name: Update CA trust in awx containers
+  command: docker exec {{ item }} '/usr/bin/update-ca-trust'
+  with_items:
+    - awx_web
+    - awx_task
+  tags:
+    - awx
+    - awx-config
+    - awx-config-post
+
+###############################################################################
+# create superuser account and copy ssh certs
+
+#- name:  set admin password for AWX UI
+#  shell: |
+#    docker exec awx_task awx-manage createsuperuser --username={{ awx_admin_username }} --email={{ awx_admin_email }} --noinput
+#    docker exec awx_task awx-manage update_password --username={{ awx_admin_username }} --password={{ secrets.awx.awx_admin_password }}
+#  tags:
+#    - awx
+#    - awx-config
+#    - awx-config-post
+
+- name:  copy ssh creds to aws_task container
+  shell: |
+    docker exec -it {{ item }} mkdir -p /root/.ssh
+    docker exec -it {{ item }} mkdir -p /var/lib/awx/.ssh
+
+    docker cp {{ local_ssh_dir }}/id_rsa {{ item }}:/root/.ssh/id_rsa
+    docker cp {{ local_ssh_dir }}/id_rsa.pub {{ item }}:/root/.ssh/id_rsa.pub
+
+    docker cp {{ local_ssh_dir }}/id_rsa {{ item }}:/var/lib/awx/.ssh/id_rsa
+    docker cp {{ local_ssh_dir }}/id_rsa.pub {{ item }}:/var/lib/awx/.ssh/id_rsa.pub
+
+    docker exec -it {{ item }} chmod 400 /root/.ssh/id_rsa /root/.ssh/id_rsa.pub
+    docker exec -it {{ item }} chown root:root /var/lib/awx/.ssh/id_rsa /root/.ssh/id_rsa.pub
+  with_items:
+    - awx_task
+    - awx_web
+  tags:
+    - awx
+    - awx-config
+    - awx-config-post

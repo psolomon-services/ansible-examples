@@ -1,0 +1,97 @@
+---
+# NOTE:  same container image is used for awx_web and awx_task containers
+
+- name: create awx container (web)
+  docker_container:
+    name:                awx_web
+    image:               '{{ awx_container_image }}'
+    pull:                true
+    hostname:            awx
+    state:               started
+    # fixes /var/run/docker.sock perms problem
+    user:                '0'
+    privileged:          true
+    restart_policy:      unless-stopped
+    recreate:            '{{ force_recreate_container }}'
+    dns_search_domains:  '{{ dns_search_domains }}'
+    dns_servers:         '{{ dns_servers }}'
+    published_ports:
+      - "9081:8052"
+    exposed_ports:
+      - "8052"
+    env:
+      VIRTUAL_HOST:     '{{ nginx_awx_host }}'
+      VIRTUAL_PORT:     '8052'
+      CLUSTER_HOST_ID:  'awx'
+    volumes:
+      - 'supervisor-socket:/var/run/supervisor'
+      - 'rsyslog-socket:/var/run/awx-rsyslog/'
+      - 'rsyslog-config:/var/lib/awx/rsyslog/'
+      - '{{ awx_volume_dir }}/config/SECRET_KEY:/etc/tower/SECRET_KEY'
+      - '{{ awx_volume_dir }}/config/environment.sh:/etc/tower/conf.d/environment.sh'
+      - '{{ awx_volume_dir }}/config/credentials.py:/etc/tower/conf.d/credentials.py'
+      - '{{ awx_volume_dir }}/config/nginx.conf:/etc/nginx/nginx.conf:ro'
+      - '{{ awx_volume_dir }}/config/redis_socket:/var/run/redis/:rw'
+      # had DNS probs with the gravity restart (pihole -g), so mount host resolv.conf file
+      - "/etc/resolv.conf:/etc/resolv.conf"
+    networks:
+      - name: '{{ docker_network_name }}'
+  register:  awx_web_container_info
+  tags:
+    - awx
+
+###############################################################################
+
+- name: create awx container (task)
+  docker_container:
+    name:                awx_task
+    image:               '{{ awx_container_image }}'
+    pull:                true
+    hostname:            awx
+    state:               started
+    # fixes /var/run/docker.sock perms problem
+    user:                '0'
+    privileged:          true
+    command:             /usr/bin/launch_awx_task.sh
+    restart_policy:      unless-stopped
+    recreate:            '{{ force_recreate_container }}'
+    dns_search_domains:  '{{ dns_search_domains }}'
+    dns_servers:         '{{ dns_servers }}'
+    # needed for the wait_for module
+    published_ports:
+      - "9082:8052"
+    exposed_ports:
+      - "8052"
+    env:
+      AWX_SKIP_MIGRATIONS:         '1'
+      SUPERVISOR_WEB_CONFIG_PATH:  '/etc/supervisord.conf'
+    volumes:
+      - 'supervisor-socket:/var/run/supervisor'
+      - 'rsyslog-socket:/var/run/awx-rsyslog/'
+      - 'rsyslog-config:/var/lib/awx/rsyslog/'
+      - '{{ awx_volume_dir }}/config/SECRET_KEY:/etc/tower/SECRET_KEY'
+      - '{{ awx_volume_dir }}/config/environment.sh:/etc/tower/conf.d/environment.sh'
+      - '{{ awx_volume_dir }}/config/credentials.py:/etc/tower/conf.d/credentials.py'
+      - '{{ awx_volume_dir }}/config/redis_socket:/var/run/redis/:rw'
+      # had DNS probs with the gravity restart (pihole -g), so mount host resolv.conf file
+      - "/etc/resolv.conf:/etc/resolv.conf"
+    networks:
+      - name: '{{ docker_network_name }}'
+  register:  awx_task_container_info
+  tags:
+    - awx
+
+# NOTE: had to publish ports to the host node to get this to work (thus no ip address passed to the module)
+
+- name:  wait for awx_task container start ({{ item.container }})
+  include_tasks:  ../roles/awx/tasks/wait_for_container_start.yml
+  vars:
+    awx_name:  '{{ item.container }}'
+    # doesn't work for native wait_for (investigating)
+    #awx_ip:    '{{ item.ip }}'
+    awx_port:  '{{ item.port }}'
+  loop:
+    - { container: awx-web,  port:  9081 }
+    - { container: awx-task, port:  9082 }
+  tags:
+    - awx

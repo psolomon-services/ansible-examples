@@ -1,0 +1,22 @@
+---
+- name: create nginx-proxy container {{ nginx_container_name }}
+  docker_container:
+    name:            '{{ nginx_container_name }}'
+    image:           '{{ nginx_container_image }}'
+    pull:            true
+    state:           started
+    # normally defaults to "false"
+    recreate:        '{{ force_recreate_container }}'
+    restart_policy:  unless-stopped
+    published_ports:
+      - 80:80
+    volumes:
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+    networks:
+      - name: '{{ docker_network_name }}'
+  #register: docker_container_results
+  tags:
+    - nginx-proxy
+
+#- name: show docker container info
+#  debug: var=docker_container_results.container

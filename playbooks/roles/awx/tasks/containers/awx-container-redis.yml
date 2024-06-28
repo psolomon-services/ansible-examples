@@ -1,0 +1,58 @@
+---
+- name: create redis socket dir
+  file:
+    path:   '{{ awx_volume_dir }}/config/redis_socket'
+    state:  directory
+    owner:  root
+    group:  docker
+    mode:   '0777'
+  become:  true
+  tags:
+    - awx
+
+- name:  copy config
+  template:
+    src:    'templates/redis.conf.j2'
+    dest:   '{{ awx_volume_dir }}/config/redis.conf'
+    owner:  root
+    group:  docker
+    mode:   '0640'
+  become:  true
+  tags:
+    - awx
+
+- name: create awx redis container
+  docker_container:
+    name:            awx_redis
+    image:           '{{ redis_container_image }}'
+    pull:            true
+    state:           started
+    recreate:        '{{ force_recreate_container }}'
+    restart_policy:  unless-stopped
+    command:         ["/usr/local/etc/redis/redis.conf"]
+    published_ports:
+      - "6379:6379/tcp"
+      - "6379:6379/udp"
+    exposed_ports:
+      - '6379/udp'
+      - '6379/tcp'
+    volumes:
+      - '{{ awx_volume_dir }}/config/redis.conf:/usr/local/etc/redis/redis.conf:ro'
+      - '{{ awx_volume_dir }}/config/redis_socket:/var/run/redis/:rw'
+    networks:
+      - name: '{{ docker_network_name }}'
+  register:  redis_container_info
+  tags:
+    - awx
+
+# NOTE: had to publish ports to the host node to get this to work (thus no ip address passed to the module)
+
+- name:  wait for awx_redis container start
+  include_tasks:  ../roles/awx/tasks/wait_for_container_start.yml
+  vars:
+    awx_name:  awx_redis
+    # doesn't work for native wait_for (investigating)
+    #awx_ip:    '{{ redis_container_info.container.NetworkSettings.Networks.nginx_proxy.IPAddress }}'
+    awx_port:  6379
+  tags:
+    - awx

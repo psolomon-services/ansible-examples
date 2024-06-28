@@ -1,0 +1,49 @@
+---
+- name: create awx inventory
+  awx.awx.inventory:
+    name:                   '{{ inventory_name }}'
+    organization:           '{{ org_name }}'
+
+    #controller_host:        '{{ awx_controller_host }}'
+    controller_host:        '{{ awx_demo_url }}'
+    controller_oauthtoken:  '{{ awx_access_token0 }}'
+  when: not ansible_check_mode
+  tags:
+    - awx
+    - awx_ui
+
+- name: add an awx inventory source
+  awx.awx.inventory_source:
+    name:                    '{{ inventory_source_name }}'
+    inventory:               '{{ inventory_name }}'
+    source_path:             'playbooks/inventory/hosts.yml'
+    #source_path:             'playbooks/inventory/hosts.ini'
+    source:                  'scm'
+    source_project:          '{{ project_name }}'
+    credential:              '{{ ssh_machine_credential_name }}'
+    overwrite:               true
+    update_on_launch:        true
+    organization:            '{{ org_name }}'
+    #controller_host:        '{{ awx_controller_host }}'
+    controller_host:        '{{ awx_demo_url }}'
+    controller_oauthtoken:  '{{ awx_access_token0 }}'
+    verbosity:              2
+  when: not ansible_check_mode
+  tags:
+    - awx
+    - awx_ui
+
+- name: update awx inventory source
+  awx.awx.inventory_source_update:
+    name:                   '{{ inventory_source_name }}'
+    inventory:              '{{ inventory_name }}'
+    organization:           '{{ org_name }}'
+    wait:                   true
+
+    #controller_host:        '{{ awx_controller_host }}'
+    controller_host:        '{{ awx_demo_url }}'
+    controller_oauthtoken:  '{{ awx_access_token0 }}'
+  when: not ansible_check_mode
+  tags:
+    - awx
+    - awx_ui

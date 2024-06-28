@@ -1,0 +1,3 @@
+secrets:
+  test:
+    my_new_secret:  naming_is_hard

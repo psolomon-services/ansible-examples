@@ -1,0 +1,82 @@
+---
+- name: remove awx volume dirs, as per the force_recreate_volume_dirs flag
+  file:
+    path:   '{{ awx_volume_dir }}'
+    state:  absent
+  become:  true
+  when:  force_recreate_volume_dirs|bool
+  tags:
+    - awx
+
+- name: create awx volume dirs
+  file:
+    path:   '{{ item }}'
+    state:  directory
+    owner:  root
+    group:  docker
+    mode:   '0775'
+  with_items:
+    - '{{ awx_volume_dir }}/config'
+    - '{{ awx_volume_dir }}/pgdocker/12/data'
+  become:  true
+  tags:
+    - awx
+
+- name:  copy config
+  template:
+    src:    'templates/SECRET_KEY.vault.j2'
+    dest:   '{{ awx_volume_dir }}/config/SECRET_KEY'
+    owner:  root
+    group:  docker
+    mode:   '0640'
+  become:  true
+  tags:
+    - awx
+
+- name:  copy config
+  template:
+    src:    'templates/nginx.conf.j2'
+    dest:   '{{ awx_volume_dir }}/config/nginx.conf'
+    owner:  root
+    group:  docker
+    mode:   '0640'
+  become:  true
+  tags:
+    - awx
+
+- name: create awx shared volumes
+  docker_volume:
+    name: '{{ item }}'
+  with_items:
+    - supervisor-socket
+    - rsyslog-socket
+    - rsyslog-config
+  tags:
+    - awx
+
+- name:  copy env-related config
+  template:
+    src:    'templates/{{ item }}.j2'
+    dest:   '{{ awx_volume_dir }}/config/{{ item }}'
+    owner:  root
+    group:  docker
+    mode:   '0640'
+  with_items:
+    - credentials.py
+    - environment.sh
+  become:  true
+  tags:
+    - awx
+
+- name:  make all config scripts executable
+  file:
+    path:   '{{ item }}'
+    state:  file
+    mode:   '0774'
+  with_items:
+    - '{{ awx_volume_dir }}/config/credentials.py'
+    - '{{ awx_volume_dir }}/config/environment.sh'
+  become:  true
+  when:  not ansible_check_mode
+  tags:
+    - awx

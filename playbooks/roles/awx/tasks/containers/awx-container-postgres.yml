@@ -1,0 +1,34 @@
+---
+- name: create awx postgres container
+  docker_container:
+    name:            awx_postgres
+    image:           '{{ postgres_container_image }}'
+    pull:            true
+    state:           started
+    recreate:        '{{ force_recreate_container }}'
+    restart_policy:  unless-stopped
+    exposed_ports:
+      - '5432/udp'
+      - '5432/tcp'
+    volumes:
+      - '{{ awx_volume_dir }}/pgdocker/12/data/:/var/lib/postgresql/data:Z'
+    env:
+      POSTGRES_USER:      '{{ postgres_username }}'
+      POSTGRES_PASSWORD:  '{{ secrets.postgres.postgres_password }}'
+      POSTGRES_DB:        awx
+    networks:
+      # subnet 172.16.1.0/24
+      - name:           '{{ docker_network_name }}'
+        ipv4_address:   '{{ awx_postgres_ip_address }}'
+  register: postgres_container_info
+  tags:
+    - awx
+
+- name:  wait for awx_postgres container start
+  include_tasks:  ../roles/awx/tasks/wait_for_container_start.yml
+  vars:
+    awx_name:  awx_postgres
+    awx_ip:    '{{ awx_postgres_ip_address }}'
+    awx_port:  5432
+  tags:
+    - awx

@@ -1,0 +1,6 @@
+---
+#ansible_host:       pihole.pauljsolomon.net
+ansible_host:       192.168.1.194
+pihole_hostname:    awx-main
+nginx_pihole_host:  awx.pauljsolomon.net
+nginx_awx_host:     awx.pauljsolomon.net

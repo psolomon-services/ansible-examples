@@ -1,0 +1,5 @@
+---
+unbound_dir:                   "{{ pihole_dir }}"
+unbound_container_image:       mvance/unbound:latest
+unbound_container_name:        unbound
+unbound_server_port:           5353

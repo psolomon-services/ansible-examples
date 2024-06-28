@@ -1,0 +1,14 @@
+---
+#ansible_host:          sandbox1.pauljsolomon.net
+ansible_host:          192.168.1.232
+ansible_user:          ubuntu
+APP:                   SERVICES
+jenkins_hostname:      jenkins-sandbox
+nginx_awx_host:        awx-sandbox.pauljsolomon.net
+nginx_jenkins_host:    jenkins-sandbox.pauljsolomon.net
+nginx_pihole_host:     pihole-sandbox.pauljsolomon.net
+nginx_plex_host:       plex-sandbox.pauljsolomon.net
+nginx_portainer_host:  portainer-sandbox.pauljsolomon.net
+pihole_hostname:       pihole-sandbox
+plex_hostname:         plex-sandbox
+portainer_hostname:    portainer-sandbox

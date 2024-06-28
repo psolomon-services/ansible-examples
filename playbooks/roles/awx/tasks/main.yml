@@ -1,0 +1,196 @@
+---
+###############################################################################
+# get demo service port
+
+- name: setting demo service port
+  ansible.builtin.set_fact:
+    #awx_demo_service_port:  '{{ awx_demo_service_port_log.stdout }}'
+    #awx_demo_service_port:  9082
+    awx_demo_service_port:  8052
+  tags:
+    - awx
+    - awx_ui
+- name: awxpjstask
+  debug:
+    msg:  "demo service port {{ awx_demo_service_port }}"
+  tags:
+    - awx
+    - awx_ui
+
+- name: starting config
+  debug:
+    msg:  "starting awx tasks"
+  tags:
+    - awx
+    - awx_ui
+
+
+###############################################################################
+# generate cluster addr url
+
+#- name:  get cluster address
+#  #shell:  "docker inspect  -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' awx_task"
+#  command:  docker inspect  -f '\{\{range.NetworkSettings.Networks\}\}\{\{.IPAddress\}\}\{\{end\}\}' awx_task
+#  register: res1
+
+- name:  get cluster address
+  ansible.builtin.set_fact:
+    #awx_cluster_ip:  172.16.1.6   # awx_task
+
+    awx_cluster_ip:  172.16.1.4 # awx_web
+
+    #awx_cluster_ip:  127.0.0.1
+    #awx_cluster_ip:  192.168.1.194
+    #awx_cluster_ip:  "{{ res1.stdout }}"
+  tags:
+    - awx
+    - awx_ui
+
+- name:  generate cluster address url
+  ansible.builtin.set_fact:
+    awx_demo_url:  'http://{{ awx_cluster_ip }}:{{ awx_demo_service_port }}'
+  tags:
+    - awx
+    - awx_ui
+- name: awxpjstask
+  debug:
+    msg:  "demo url {{ awx_demo_url }}"
+  tags:
+    - awx
+    - awx_ui
+
+
+###############################################################################
+
+- name:  create awx infrastructure
+  import_tasks: ../roles/awx/tasks/config/awx-config-infra.yml
+  tags:
+    - awx
+    - awx_awx_infra
+
+- name:  create awx redis container
+  import_tasks: ../roles/awx/tasks/containers/awx-container-redis.yml
+  tags:
+    - awx
+    - awx_redis
+
+- name:  create awx postgres container
+  import_tasks: ../roles/awx/tasks/containers/awx-container-postgres.yml
+  tags:
+    - awx
+    - awx_postgres
+
+- name:  create awx web and task containers
+  import_tasks: ../roles/awx/tasks/containers/awx-container-web-task.yml
+  tags:
+    - awx
+    - awx_taskweb
+
+
+###############################################################################
+- name:  prepare for UI configuration, migrate
+  import_tasks: ../roles/awx/tasks/config/awx-config-migrate.yml
+  tags:
+    - awx
+    - aws_migrate
+
+#######################################################
+
+- name:  XXXXXXX set admin password for AWX UI
+  shell: |
+    docker exec awx_task awx-manage createsuperuser --username={{ awx_admin_username }} --email={{ awx_admin_email }} --noinput
+    docker exec awx_task awx-manage update_password --username={{ awx_admin_username }} --password={{ secrets.awx.awx_admin_password }}
+
+- name:  prepare for UI configuration, update CA certs, copy keys to container, create users
+  import_tasks: ../roles/awx/tasks/config/awx-config-post.yml
+  tags:
+    - awx
+    - awx_superuser
+
+#######################################################
+
+- name:  get access token for awx, for accessing awx.awx collection modules
+  shell:    "docker exec awx_task /bin/bash -c 'awx-manage create_oauth2_token --user admin'"
+  #no_log:   true
+  register: awx_token_log
+  tags:
+    - awx
+    - awx_ui
+- name: set token variable
+  set_fact:
+    awx_access_token:  '{{ awx_token_log.stdout }}'
+  tags:
+    - awx
+    - awx_ui
+- name: access token output
+  debug:
+    msg:  "XXXXXXXXXXXXXXXXXXXXXXXX awx_access_token {{ awx_access_token }}"
+  tags:
+    - awx
+    - awx_ui
+
+###############################################################################
+# NOTE:  the following tasks call awx.awx collections modules to create the
+#        remaining settings in the AWX UI
+#
+# NOTE:  must pass controller access token to each module because it is a
+#        dynamic variable.  static variables don't need to be passed.
+###############################################################################
+
+- name:  create awx orgs
+  import_tasks: ../roles/awx/tasks/ui/awx-ui-orgs.yml
+  vars:
+    awx_access_token0:     '{{ awx_access_token }}'
+  tags:
+    - awx
+    - awx_ui
+
+- name:  create additional awx users
+  import_tasks: ../roles/awx/tasks/ui/awx-ui-users.yml
+  vars:
+    awx_access_token0:     '{{ awx_access_token }}'
+  tags:
+    - awx
+    - awx_ui
+
+- name:  create awx credentials
+  import_tasks: ../roles/awx/tasks/ui/awx-ui-credentials.yml
+  vars:
+    awx_access_token0:     '{{ awx_access_token }}'
+  tags:
+    - awx
+    - awx_ui
+
+- name:  create awx projects
+  import_tasks: ../roles/awx/tasks/ui/awx-ui-projects.yml
+  vars:
+    awx_access_token0:     '{{ awx_access_token }}'
+  tags:
+    - awx
+    - awx_ui
+
+- name:  create awx inventory
+  import_tasks: ../roles/awx/tasks/ui/awx-ui-inventories.yml
+  vars:
+    awx_access_token0:     '{{ awx_access_token }}'
+  tags:
+    - awx
+    - awx_ui
+
+- name:  create awx jobs
+  import_tasks: ../roles/awx/tasks/ui/awx-ui-jobs.yml
+  vars:
+    awx_access_token0:     '{{ awx_access_token }}'
+  tags:
+    - awx
+    - awx_ui
+
+###############################################################################
+
+- name: config completed
+  debug:
+    msg:  "completed awx tasks"
+  tags:
+    - awx
+    - awx_ui
+

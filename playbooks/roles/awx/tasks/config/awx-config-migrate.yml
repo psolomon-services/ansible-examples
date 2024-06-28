@@ -1,0 +1,33 @@
+---
+# not needed in kubernetes installation
+
+- name: migrate and restart containers
+  block:
+    - name: run migration on awx_web container
+      command:       'docker exec -it awx_web bash -c "awx-manage migrate"'
+      retries:       4
+      delay:         5
+      until:         "'No migrations to apply' in migration_status.stdout"
+      changed_when:  no
+      register:      migration_status
+
+    - name: restart awx web and task containers
+      shell:  'docker restart {{ item }}'
+      with_items:
+        - awx_web
+        - awx_task
+
+    - name:  AFTER MIGRATION wait for awx_task container start ({{ item.container }})
+      include_tasks:  wait_for_container_start.yml
+      vars:
+        awx_name:  '{{ item.container }}'
+        # doesn't work for native wait_for (investigating)
+        #awx_ip:    '{{ item.ip }}'
+        awx_port:  '{{ item.port }}'
+      loop:
+        - { container: awx-web,  port:  9081 }
+        - { container: awx-task, port:  9082 }
+
+  when: not ansible_check_mode
+  tags:
+    - awx
