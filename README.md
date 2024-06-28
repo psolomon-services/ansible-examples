@@ -3,7 +3,7 @@
 The following playbooks (and roles) were copied from my private ansible repo.
 All private information (config) has been removed.
 
-*NOTE:  These playbooks and roles were, for the most part, written from scratch, to facilitate Ansible learning.*
+*NOTE:  These playbooks and roles were written mostly from scratch, to facilitate Ansible learning.*
 
 ## TODOs
 
@@ -11,8 +11,8 @@ _Most of my TODOs are related to splitting up roles and cleaning up the playbook
 
 ## Playbooks
 
-- `awx.yml`:                     _full deploy of an AWX setup, including UI setup (project/inventory/templates/etc.)_
-  - _this was written prior to moving to kubernetes (but the k8s deploy still needs ansible UI setup from this playbook, due to lack of CRDs for things like `Projects` and `Inventory`)_
+- `awx.yml`:                     _full deploy of an AWX setup, including UI setup (project/inventory/templates/etc)_
+  - _this was written prior to moving to kubernetes (but the k8s deploy still needs ansible UI setup from this playbook, due to lack of CRDs for resources like `Projects` and `Inventory`)_
   - _the goal for this project was for an out of the box installation (i.e. log in, press a button, deploy pihole, with no additional changes to the AWX UI)_
   - _this is definitely my most complex playbook/role_
   - _NOTE:  this awx playbook installs most, if not all, of the following playbooks (as Templates) in the AWX UI_
@@ -27,9 +27,11 @@ _Most of my TODOs are related to splitting up roles and cleaning up the playbook
 - `test-collections.yml`:        _tests loading of collections_
 - `test-vault-secrets.yml`:      _tests retrieval of secrets (Ansible Vault) and non-secrets_
 
-## Other
+## Inventory
+- `playbooks/inventory`:         _local, non-dynamic Ansible inventory (for my home lab)_
 
-- `inventory`:                   _local, non-dynamic Ansible inventory (for my home lab)_
+## Config and Other
+
 - `playbooks/host_vars`:         _host-related config_
 - `playbooks/group_vars`:        _group-related config and a vault file_
 - `roles`:                       _roles for above playbooks_
