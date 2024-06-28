@@ -3,7 +3,10 @@
 The following playbooks (and roles) were copied from my private ansible repo.
 All private information (config) has been removed.
 
-Playbooks:
+*NOTE:  These playbooks and roles were, for the most part, written from scratch, to facilitate Ansible learning.*
+
+## Playbooks
+
 - `awx.yml`:                     _full deploy of an AWX setup, including UI setup (project/inventory/templates/etc.)_
   - _this was written prior to moving to kubernetes (but the k8s deploy still needs ansible UI setup from this playbook)_
   - _the goal for this project was for an out of the box installtion (i.e. log in, press a button, deploy pihole, with no additional changes to the AWX UI)_
@@ -18,7 +21,7 @@ Playbooks:
 - `test-collections.yml`:        _tests loading of collections_
 - `test-vault-secrets.yml`:      _tests retrieval of secrets (Ansible Vault) and non-secrets_
 
-Other:
+## Other
 
 - `inventory`:                   _local, non-dynamic Ansible inventory (for my home lab)_
 - `host_vars`:                   _host-related config_
