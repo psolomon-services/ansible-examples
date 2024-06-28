@@ -20,7 +20,7 @@ _Most of my TODOs are related to splitting up roles and cleaning up the playbook
   - _similar goal to AWX, out of box full setup -- *IN PROGRESS*_
 - `pihole.yml`:                  _full pihole install, including docker setup, nginx reverse proxy, unbound, adlists, and local DNS config_
 - `pihole-test-dns-lookups.yml`: _test pihole DNS setup_
-- `pihole-update-adlists.yml`:   _update adlists (with option to turn each ON or OFF)_
+- `pihole-update-adlists.yml`:   _update adlists (with option to turn each ON or OFF, messy, but it works for now)_
 - `pihole-update-dns.yml`:       _updates pihole local DNS list_
 - `ping.yml`:                    _normal Ansible ping playbook_
 - `test-collections.yml`:        _tests loading of collections_
