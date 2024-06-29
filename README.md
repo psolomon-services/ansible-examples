@@ -16,7 +16,7 @@ _Most of my TODOs are related to splitting up roles and cleaning up the playbook
   - _The goal for this project was for an out of the box installation (i.e. log in, press a button, deploy pihole, with no additional changes to the AWX UI)_
   - _NOTE:  this AWX playbook installs all playbooks, below, plus others, not covered here_
 - `info.yml`:                    _similar to ping, gives more info on nodes_
-- `jenkins.yml`:                 _jenkins install, from CASC plugin (the CASC setup is in Ansible vault because of some private certs, but has been removed from this repo)_
+- `jenkins.yml`:                 _jenkins install, from CASC plugin (the CASC setup is in Ansible vault because of some private certs, but has been removed prior to creating this repo)_
   - _similar goal to AWX, out of box full setup -- *IN PROGRESS*_
 - `pihole.yml`:                  _full pihole install, including docker setup, nginx reverse proxy, unbound, adlists, and local DNS config_
 - `pihole-test-dns-lookups.yml`: _test pihole DNS setup_
