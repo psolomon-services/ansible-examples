@@ -1,7 +1,6 @@
 # Ansible Project
 
-The following playbooks (and roles) were copied from my private Ansible repo.
-All private information (config) has been removed.
+The following playbooks (and roles) were copied from my private Ansible repo, which include several of my home lab projects.  All private information (config) has been removed.
 
 *NOTE:  These playbooks and roles were written mostly from scratch, to facilitate Ansible learning!*
 
