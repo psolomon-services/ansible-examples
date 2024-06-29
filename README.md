@@ -1,4 +1,4 @@
-# Ansible Project
+# Ansible Projects
 
 The following playbooks (and roles) were copied from my private Ansible repo, which include several of my home lab projects.  All private information (config) has been removed.
 
